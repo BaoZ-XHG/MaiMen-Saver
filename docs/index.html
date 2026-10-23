@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麦门省钱配方 · MaiMen Saver</title>
+<style>
+  :root {
+    --red: #DA291C;
+    --yellow: #FFC72C;
+    --cream: #FFF9EF;
+    --ink: #2B2622;
+    --muted: #8A8277;
+    --line: #EDE5D8;
+    --green: #1D9E75;
+    --card: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+    background: var(--cream); color: var(--ink); line-height: 1.6;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+  a { color: var(--red); text-decoration: none; }
+
+  header { padding: 18px 0; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 17px; }
+  .brand .dot {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--red); color: #fff; display: flex; align-items: center;
+    justify-content: center; font-weight: 900; font-size: 18px;
+  }
+  .brand .dot::after { content: ''; }
+  .topbar nav { display: flex; gap: 22px; font-size: 14px; }
+  .topbar nav a { color: var(--muted); }
+  .topbar nav a:hover { color: var(--red); }
+
+  .hero { text-align: center; padding: 44px 0 8px; }
+  .hero .kicker {
+    display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    color: var(--red); border: 1.5px solid var(--red); border-radius: 999px;
+    padding: 4px 14px; margin-bottom: 18px;
+  }
+  .hero h1 { font-size: 44px; font-weight: 900; letter-spacing: -1px; line-height: 1.2; }
+  .hero h1 .hl { color: var(--red); position: relative; }
+  .hero .sub { font-size: 16px; color: var(--muted); margin-top: 14px; max-width: 560px; margin-left: auto; margin-right: auto; }
+  .hero .pill {
+    display: inline-block; margin-top: 20px; padding: 8px 20px;
+    background: var(--yellow); color: var(--ink); font-weight: 700; border-radius: 999px; font-size: 14px;
+  }
+
+  .stage {
+    display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 28px;
+    align-items: start; margin: 36px 0;
+  }
+  @media (max-width: 820px) { .stage { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; }
+  .panel h3 { font-size: 15px; margin-bottom: 4px; }
+  .panel .hint { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 8px 14px; border-radius: 12px; cursor: pointer; font-size: 13px;
+    border: 1.5px solid var(--line); background: #fff; user-select: none; transition: .15s;
+  }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip .p { color: var(--muted); font-size: 12px; margin-left: 4px; }
+  .chip.on .p { color: #BDB6AA; }
+
+  .controls { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button { padding: 7px 16px; border: none; background: #fff; cursor: pointer; font-size: 13px; }
+  .seg button.on { background: var(--red); color: #fff; }
+  .btn {
+    padding: 7px 16px; border-radius: 10px; border: 1px solid var(--line);
+    background: #fff; cursor: pointer; font-size: 13px;
+  }
+  .btn:hover { border-color: var(--red); color: var(--red); }
+
+  .threshold {
+    margin-top: 20px; border-top: 1px dashed var(--line); padding-top: 16px;
+  }
+  .threshold .t-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
+  .threshold .t-head .next { color: var(--red); font-weight: 700; }
+  .bar { height: 12px; background: #F1EBDF; border-radius: 999px; overflow: hidden; position: relative; }
+  .bar .fill {
+    height: 100%; background: var(--yellow); border-radius: 999px;
+    transition: width .3s ease;
+  }
+  .bar .tick {
+    position: absolute; top: -3px; width: 2px; height: 18px; background: var(--red);
+  }
+  .tick-label { position: absolute; font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .threshold .t-note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  .hero-num { text-align: center; }
+  .hero-num .lbl { font-size: 13px; color: var(--muted); }
+  .hero-num .big { font-size: 58px; font-weight: 900; color: var(--red); line-height: 1.05; }
+  .hero-num .delta { font-size: 15px; color: var(--green); font-weight: 700; margin-top: 2px; }
+  .hero-num .delta span { color: var(--muted); font-weight: 400; }
+
+  .ring-wrap { display: flex; align-items: center; justify-content: center; margin-top: 14px; }
+  .ring { position: relative; width: 120px; height: 120px; }
+  .ring svg { transform: rotate(-90deg); }
+  .ring .center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .ring .center .r1 { font-size: 26px; font-weight: 800; color: var(--green); }
+  .ring .center .r2 { font-size: 11px; color: var(--muted); }
+
+  .recipe-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .recipe {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    border: 1px solid var(--line); border-radius: 14px; cursor: pointer; transition: .15s;
+  }
+  .recipe:hover { border-color: var(--red); }
+  .recipe.best { border: 2px solid var(--red); background: #FFF4F2; }
+  .recipe .r-badge {
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;
+  }
+  .recipe .r-badge.t1 { background: var(--yellow); color: var(--ink); }
+  .recipe .r-badge.t2 { background: #F1EBDF; color: var(--ink); }
+  .recipe .r-main { flex: 1; min-width: 0; }
+  .recipe .r-name { font-size: 14px; font-weight: 600; }
+  .recipe .r-desc { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .recipe .r-pay { text-align: right; }
+  .recipe .r-pay .p1 { font-size: 16px; font-weight: 800; }
+  .recipe .r-pay .p2 { font-size: 11px; color: var(--green); font-weight: 600; }
+
+  section { padding: 44px 0; }
+  .sec-title { font-size: 26px; font-weight: 900; text-align: center; margin-bottom: 6px; }
+  .sec-sub { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 820px) { .feature-grid { grid-template-columns: 1fr; } }
+  .feat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
+  .feat .icon {
+    width: 42px; height: 42px; border-radius: 12px; background: #F1EBDF;
+    display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px;
+  }
+  .feat h4 { font-size: 16px; margin-bottom: 6px; }
+  .feat p { font-size: 13px; color: var(--muted); }
+
+  .diff { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 26px; }
+  .diff h4 { font-size: 17px; margin-bottom: 14px; }
+  .diff ul { list-style: none; }
+  .diff li { padding: 12px 0; border-bottom: 1px dashed var(--line); font-size: 14px; display: flex; gap: 10px; }
+  .diff li:last-child { border-bottom: none; }
+  .diff li .mk { color: var(--red); font-weight: 800; flex-shrink: 0; }
+
+  .install { background: var(--ink); color: #EFE9DC; border-radius: 20px; padding: 28px; }
+  .install h4 { color: #fff; font-size: 17px; margin-bottom: 14px; }
+  .install pre {
+    background: #1E1B17; color: #E8E2D4; padding: 18px; border-radius: 12px;
+    font-size: 13px; overflow-x: auto; line-height: 1.7;
+  }
+
+  footer { text-align: center; padding: 40px 0 56px; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--red); }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<h2 class="sr-only">麦门省钱配方——一键生成这单怎么买最省的省钱配方</h2>
+
+<header>
+  <div class="wrap topbar">
+    <div class="brand"><span class="dot">M</span> 麦门省钱配方</div>
+    <nav>
+      <a href="#kitchen">配方工坊</a>
+      <a href="#features">创新点</a>
+      <a href="#diff">为什么不同</a>
+      <a href="#install">安装</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="kicker">麦当劳省钱配方生成器</div>
+    <h1>点单不说「随便」，<br>直接生成<span class="hl">省钱配方</span></h1>
+    <p class="sub">别人帮你查券，这里帮你「调配方」：输入想吃的，一键生成这单的最优省钱配方，还能实时看到离下一档满减还差几块钱。</p>
+    <div class="pill">确定性算法 · 实时凑单雷达 · 可复现</div>
+  </div>
+
+  <div class="stage" id="kitchen">
+    <div class="panel">
+      <h3>选你想吃的</h3>
+      <p class="hint">点选餐品，配方实时更新</p>
+      <div class="chips" id="chips"></div>
+
+      <div class="controls">
+        <div class="seg" id="segMode">
+          <button data-mode="dine" class="on">到店自取</button>
+          <button data-mode="delivery">外送</button>
+        </div>
+        <button class="btn" id="resetBtn">恢复默认</button>
+      </div>
+
+      <div class="threshold" id="thresholdBox">
+        <div class="t-head">
+          <span>满减冲刺 · 下一档</span>
+          <span class="next" id="nextLabel">满 50 减 15</span>
+        </div>
+        <div class="bar">
+          <div class="fill" id="fillBar" style="width:0%"></div>
+        </div>
+        <div class="t-note" id="tNote">再凑 ¥0 即可触发下一档满减</div>
+      </div>
+    </div>
+
+    <div class="panel" style="text-align:center;">
+      <h3 style="text-align:left;">今日省钱配方</h3>
+      <p class="hint" style="text-align:left;">最优方案与可省钱力度</p>
+
+      <div class="hero-num">
+        <div class="lbl" id="originText">原价 ¥47.00</div>
+        <div class="big" id="finalText">¥21.90</div>
+        <div class="delta" id="savedText">省 ¥25.10 · 53% <span id="usedText">· 用「1+1随心配」</span></div>
+      </div>
+
+      <div class="ring-wrap">
+        <div class="ring">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#F1EBDF" stroke-width="12"></circle>
+            <circle id="ringArc" cx="60" cy="60" r="52" fill="none" stroke="#1D9E75" stroke-width="12"
+              stroke-linecap="round" stroke-dasharray="0 327" stroke-dashoffset="0"></circle>
+          </svg>
+          <div class="center">
+            <div class="r1" id="ringPct">53%</div>
+            <div class="r2">省钱力度</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="recipe-list" id="recipeList"></div>
+    </div>
+  </div>
+
+  <section id="features">
+    <h2 class="sec-title">三个创新点</h2>
+    <p class="sec-sub">不是又一个「查券工具」</p>
+    <div class="feature-grid">
+      <div class="feat">
+        <div class="icon">🧪</div>
+        <h4>省钱配方</h4>
+        <p>把最优方案叫「配方」，像奶茶配方一样可分享、可收藏，让省钱结果有记忆点、能传播。</p>
+      </div>
+      <div class="feat">
+        <div class="icon">📡</div>
+        <h4>凑单雷达</h4>
+        <p>独有的「满减冲刺条」：实时显示离下一档满减还差几块钱，凑单是否划算一眼看清。</p>
+      </div>
+      <div class="feat">
+        <div class="icon">🎯</div>
+        <h4>省钱力度环</h4>
+        <p>用环形进度条把「省了多少百分点」可视化，一张截图就能表达省钱效果，天然适合传播。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="diff">
+    <h2 class="sec-title">为什么不一样</h2>
+    <p class="sec-sub">和同类省钱工具的差异</p>
+    <div class="diff">
+      <h4>定位差异</h4>
+      <ul>
+        <li><span class="mk">›</span> 别人是「算账工具」，我是「配方生成器」——结果不是冷冰冰的数字，而是可分享的省钱配方。</li>
+        <li><span class="mk">›</span> 别人查完券让用户自己判断，我用「凑单雷达」主动告诉你再凑几块钱反而更省。</li>
+        <li><span class="mk">›</span> 别人用大模型「猜」优惠，我用确定性算法穷举「用券/用满减/无优惠」三条路径，结果可复现、可验证。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="install">
+      <h4>本地跑起来</h4>
+      <pre>git clone https://github.com/BaoZ-XHG/MaiMen-Saver.git
+cd MaiMen-Saver
+python cli.py demo        # 离线演示
+
+# 真实调用麦当劳 MCP（需申请 MCP Token）
+export MCP_TOKEN=你的Token
+python cli.py real --store-code 123456 --order-type 1</pre>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>麦门省钱配方 · 麦当劳程序员创意开发大赛参赛作品 · 非麦当劳官方产品</p>
+  <p style="margin-top:6px;"><a href="https://github.com/BaoZ-XHG/MaiMen-Saver">GitHub 仓库</a></p>
+</footer>
+
+<script>
+const PRODUCTS = [
+  { code: 'A', name: '巨无霸', price: 2400 },
+  { code: 'B', name: '板烧鸡腿堡', price: 1800 },
+  { code: 'C', name: '中薯条', price: 1200 },
+  { code: 'D', name: '可乐(中)', price: 800 },
+  { code: 'E', name: '麦辣鸡翅', price: 1300 },
+  { code: 'F', name: '苹果派', price: 700 },
+  { code: 'G', name: '甜筒', price: 400 },
+  { code: 'H', name: '麦香鱼', price: 1600 },
+];
+
+const COUPONS = [
+  { id: 'C1', name: '满30减10', kind: 'full_reduction', threshold: 3000, value: 1000 },
+  { id: 'C2', name: '全场8折', kind: 'discount', threshold: 0, value: 80 },
+  { id: 'C3', name: '满50减15', kind: 'full_reduction', threshold: 5000, value: 1500 },
+  { id: 'C4', name: '立减5元', kind: 'direct', threshold: 0, value: 500 },
+];
+
+const PROMOTIONS = [
+  { id: 'P1', name: '团餐满60减18', type: 31, threshold: 6000, value: 1800 },
+];
+
+const TIERS = [
+  { threshold: 3000, value: 1000, label: '满30减10' },
+  { threshold: 5000, value: 1500, label: '满50减15' },
+  { threshold: 6000, value: 1800, label: '满60减18' },
+];
+
+const DEFAULT_SELECTED = ['A', 'C', 'D'];
+let selected = new Set(DEFAULT_SELECTED);
+let mode = 'dine';
+
+function yuan(c) { return (c / 100).toFixed(2); }
+
+function minCostFill(gap) {
+  const items = PRODUCTS.filter(p => !selected.has(p.code));
+  if (gap <= 0 || items.length === 0) return null;
+  const maxPrice = Math.max(...items.map(p => p.price));
+  const limit = gap + maxPrice;
+  const dp = new Array(limit + 1).fill(Infinity);
+  const pick = new Array(limit + 1).fill(null);
+  dp[0] = 0; pick[0] = [];
+  for (const p of items) {
+    for (let j = p.price; j <= limit; j++) {
+      if (dp[j - p.price] + 1 < dp[j]) {
+        dp[j] = dp[j - p.price] + 1;
+        pick[j] = (pick[j - p.price] || []).concat(p.code);
+      }
+    }
+  }
+  for (let j = gap; j <= limit; j++) {
+    if (dp[j] < Infinity) {
+      const cnt = {};
+      for (const c of pick[j]) cnt[c] = (cnt[c] || 0) + 1;
+      const fill = [];
+      for (const p of PRODUCTS) {
+        if (cnt[p.code]) fill.push(`${p.name}×${cnt[p.code]}`);
+      }
+      return { sum: j, fill };
+    }
+  }
+  return null;
+}
+
+function couponDiscount(c, total) {
+  if (total < c.threshold) return 0;
+  if (c.kind === 'discount') return Math.floor(total * (100 - c.value) / 100);
+  return c.value;
+}
+
+function compute() {
+  const items = PRODUCTS.filter(p => selected.has(p.code));
+  const original = items.reduce((s, p) => s + p.price, 0);
+  if (original === 0) return null;
+
+  const plans = [
+    { label: '不使用优惠', note: '原价直买', pay: original, saved: 0 },
+  ];
+  for (const c of COUPONS) {
+    const d = couponDiscount(c, original);
+    plans.push({ label: c.name, note: c.kind === 'discount' ? '折扣券' : (c.kind === 'direct' ? '立减券' : '满减券'), pay: original - d, saved: d });
+  }
+  for (const p of PROMOTIONS) {
+    const d = original >= p.threshold ? p.value : 0;
+    plans.push({ label: p.name, note: '团餐满减', pay: original - d, saved: d });
+  }
+  plans.sort((a, b) => a.pay - b.pay || b.saved - a.saved);
+  return { items, original, plans, best: plans[0] };
+}
+
+function render() {
+  const chipsEl = document.getElementById('chips');
+  chipsEl.innerHTML = '';
+  for (const p of PRODUCTS) {
+    const chip = document.createElement('span');
+    chip.className = 'chip' + (selected.has(p.code) ? ' on' : '');
+    chip.innerHTML = `${p.name}<span class="p">¥${yuan(p.price)}</span>`;
+    chip.onclick = () => {
+      selected.has(p.code) ? selected.delete(p.code) : selected.add(p.code);
+      render();
+    };
+    chipsEl.appendChild(chip);
+  }
+
+  const r = compute();
+  if (!r) {
+    document.getElementById('finalText').textContent = '—';
+    document.getElementById('originText').textContent = '请选择餐品';
+    document.getElementById('savedText').textContent = '';
+    document.getElementById('usedText').textContent = '';
+    document.getElementById('ringPct').textContent = '0%';
+    document.getElementById('ringArc').setAttribute('stroke-dasharray', '0 327');
+    document.getElementById('recipeList').innerHTML = '';
+    document.getElementById('tNote').textContent = '请先选择餐品';
+    document.getElementById('fillBar').style.width = '0%';
+    return;
+  }
+
+  const original = r.original;
+  const best = r.best;
+  const ratio = original > 0 ? Math.round(best.saved / original * 100) : 0;
+
+  document.getElementById('originText').textContent = `原价 ¥${yuan(original)}`;
+  document.getElementById('finalText').textContent = `¥${yuan(best.pay)}`;
+  document.getElementById('savedText').innerHTML = `省 ¥${yuan(best.saved)} · ${ratio}%`;
+  document.getElementById('usedText').textContent = best.saved > 0 ? ` · 用「${best.label}」` : ' · 暂无可用优惠';
+
+  const circ = 2 * Math.PI * 52;
+  document.getElementById('ringPct').textContent = ratio + '%';
+  document.getElementById('ringArc').setAttribute('stroke-dasharray', (ratio / 100 * circ) + ' ' + circ);
+
+  const listEl = document.getElementById('recipeList');
+  listEl.innerHTML = '';
+  r.plans.slice(0, 5).forEach((p, i) => {
+    const isBest = p === best;
+    const row = document.createElement('div');
+    row.className = 'recipe' + (isBest ? ' best' : '');
+    row.innerHTML =
+      `<div class="r-badge ${i === 0 ? 't1' : 't2'}">${i === 0 ? '优选' : '备选'}</div>` +
+      `<div class="r-main"><div class="r-name">${p.label}</div><div class="r-desc">${p.note}</div></div>` +
+      `<div class="r-pay"><div class="p1">¥${yuan(p.pay)}</div><div class="p2">${p.saved > 0 ? '省¥' + yuan(p.saved) : ''}</div></div>`;
+    listEl.appendChild(row);
+  });
+
+  const nextTier = TIERS.find(t => t.threshold > original);
+  if (nextTier) {
+    const gap = nextTier.threshold - original;
+    const prevTier = TIERS.filter(t => t.threshold <= original).pop();
+    const base = prevTier ? prevTier.threshold : 0;
+    const span = nextTier.threshold - base;
+    const pct = span > 0 ? Math.min(100, (original - base) / span * 100) : 100;
+    document.getElementById('nextLabel').textContent = `${nextTier.label}`;
+    const fill = minCostFill(gap);
+    if (fill) {
+      document.getElementById('tNote').textContent = `再凑 ¥${yuan(gap)} 触发「${nextTier.label}」，建议加购 ${fill.fill.join(' + ')}（共 ¥${yuan(fill.sum)}）`;
+    } else {
+      document.getElementById('tNote').textContent = `再凑 ¥${yuan(gap)} 即可触发「${nextTier.label}」，凑单更划算`;
+    }
+    document.getElementById('fillBar').style.width = pct + '%';
+  } else {
+    document.getElementById('nextLabel').textContent = '已达最高档';
+    document.getElementById('tNote').textContent = '已触发所有满减档位';
+    document.getElementById('fillBar').style.width = '100%';
+  }
+}
+
+document.getElementById('segMode').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  mode = btn.dataset.mode;
+  document.querySelectorAll('#segMode button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  selected = new Set(DEFAULT_SELECTED);
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
